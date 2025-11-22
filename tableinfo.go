@@ -1,11 +1,17 @@
 package monadb
 
+import (
+	"fmt"
+
+	"github.com/niviten/monadb/internal/util"
+)
+
 type TableInfo struct {
 	Name        string
 	ColumnInfos []*ColumnInfo
 }
 
-type DataType int
+type DataType uint8
 
 const (
 	INT32   = 1
@@ -35,4 +41,42 @@ func sizeOfDataType(dt DataType) int {
 		return -1
 	}
 	return -1
+}
+
+var InvalidDataType = fmt.Errorf("invalid data type")
+
+func valToBytes(dt DataType, v any, size int) ([]byte, error) {
+	switch dt {
+	case INT32:
+		val, ok := v.(int32)
+		if !ok {
+			return nil, InvalidDataType
+		}
+		return util.UInt32ToBytes(uint32(val)), nil
+	case UINT32:
+		val, ok := v.(uint32)
+		if !ok {
+			return nil, InvalidDataType
+		}
+		return util.UInt32ToBytes(val), nil
+	case INT64:
+		val, ok := v.(int64)
+		if !ok {
+			return nil, InvalidDataType
+		}
+		return util.UInt64ToBytes(uint64(val)), nil
+	case UINT64:
+		val, ok := v.(uint64)
+		if !ok {
+			return nil, InvalidDataType
+		}
+		return util.UInt64ToBytes(val), nil
+	case VARCHAR:
+		val, ok := v.(string)
+		if !ok {
+			return nil, InvalidDataType
+		}
+		return util.StringToBytes(val, size)
+	}
+	return nil, InvalidDataType
 }
