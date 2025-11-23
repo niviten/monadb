@@ -76,7 +76,14 @@ func valToBytes(dt DataType, v any, size int) ([]byte, error) {
 		if !ok {
 			return nil, ErrInvalidDataType
 		}
-		return util.StringToBytes(val, size)
+		b, err := util.StringToBytes(val, size)
+		if err != nil {
+			return nil, err
+		}
+		out := make([]byte, 4+size)
+		copy(out, util.UInt32ToBytes(uint32(len(val))))
+		copy(out[4:], b)
+		return out, err
 	}
 	return nil, ErrInvalidDataType
 }
